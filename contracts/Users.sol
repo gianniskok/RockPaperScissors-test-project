@@ -15,7 +15,6 @@ contract Users{
 
     struct User {
         uint256 id;
-        uint8 credibility;
         address userAd;
         string userName;
         bool isActive;
@@ -46,32 +45,14 @@ contract Users{
         _;
     }
 
-    function createUser(string memory _userName) external notUser {
+    function createUser(string memory _userName) external virtual notUser {
         User memory userInstance;
         userInstance.id = _newUserId.current();
         userInstance.userAd = msg.sender;
-        userInstance.credibility = 100;
         userInstance.userName = _userName;
         userInstance.isActive = true;
         addToUser[msg.sender] = _newUserId.current();
         newUser.push(userInstance);
         _newUserId.increment();
     }
-
-    function discipline(address _userAd) internal {
-        require( newUser[addToUser[_userAd]].isActive == true,"NA");
-        newUser[addToUser[_userAd]].credibility -= 5;
-        
-        if(newUser[addToUser[_userAd]].credibility <= 20){
-            newUser[addToUser[_userAd]].isActive = false;
-            addressToTimestamp[_userAd] = block.timestamp;
-        }
-    }
-
-    function reActivate(address _userAd) internal {
-        require(addressToTimestamp[_userAd] + 3600 * 24 * 10 <= block.timestamp);
-        newUser[addToUser[_userAd]].isActive = true;
-        newUser[addToUser[_userAd]].credibility = 50;
-    }
-
 }

@@ -37,6 +37,8 @@ contract Init is Users{
 
     function joinGame(address _gameAdd, uint8[3] memory _choices) external activeUser{
         require(IERC20(tokenAddress).balanceOf(msg.sender) >= Game(_gameAdd).wages(),"NEB"); //Not enough balance
+        require(available[_gameAdd] == true,"NA");
+        available[_gameAdd] = false;
         address winner = Game(_gameAdd).addPlayer2(msg.sender, _choices);
         address player1 =  Game(_gameAdd).player1();
         uint16 wage = Game(_gameAdd).wages();

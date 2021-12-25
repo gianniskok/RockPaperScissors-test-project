@@ -45,7 +45,7 @@ contract Users{
         _;
     }
 
-    function createUser(string memory _userName) external virtual notUser {
+    function createUser(string memory _userName) external  notUser {
         User memory userInstance;
         userInstance.id = _newUserId.current();
         userInstance.userAd = msg.sender;
@@ -54,5 +54,7 @@ contract Users{
         addToUser[msg.sender] = _newUserId.current();
         newUser.push(userInstance);
         _newUserId.increment();
+        isUser[msg.sender] = true;
     }
+
 }

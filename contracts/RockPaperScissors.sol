@@ -9,7 +9,7 @@ contract RockPaperScissors is Users{
 
     address tokenAddress;
     address[] activequeue;
-    address[] privatequeue;
+    address[] public privatequeue;
     mapping(address => bool) available;
     mapping(address => address) player2PerCustom;
     uint256 activeindex;
@@ -17,6 +17,10 @@ contract RockPaperScissors is Users{
 
     constructor(address _tokenAdd) Users(){
         tokenAddress = _tokenAdd;
+    }
+
+    function buyToken(uint256 _ammount) external userExists {
+        IERC20(tokenAddress).transferFrom(owner, msg.sender, _ammount);
     }
 
     function createGame(uint16 _wage, uint8[3] memory _choices) external  activeUser{
@@ -40,11 +44,11 @@ contract RockPaperScissors is Users{
         address _gameAdd = findGame(_wage);
         require(_gameAdd != address(0),"A0");
         require(available[_gameAdd] == true,"NA");
-        
+        available[_gameAdd] = false;
         address winner = Game(_gameAdd).addPlayer2(msg.sender, _choices);
         address player1 =  Game(_gameAdd).player1();
         uint16 wage = Game(_gameAdd).wages();
-        available[_gameAdd] = false;
+        
         if(winner != address(0)){
             if(winner == msg.sender){
                 IERC20(tokenAddress).transferFrom(player1, msg.sender, wage);
@@ -53,7 +57,9 @@ contract RockPaperScissors is Users{
             }
         }
         return winner;
+        
     }
+ 
 
     function createCustomGame(address _player2, uint16 _wages, uint8[3] memory _p1Choices) external  userExists returns (address) {
         require(IERC20(tokenAddress).balanceOf(msg.sender) >= _wages);

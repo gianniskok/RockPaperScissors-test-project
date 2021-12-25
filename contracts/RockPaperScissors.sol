@@ -27,24 +27,20 @@ contract RockPaperScissors is Users{
     }
     
     function findGame(uint16 _wage) internal view  activeUser returns(address) {
-        address[] memory availableList;
-        uint256 currentIndex = 0;
-
-        for(uint256 i=0; i< activequeue.length -1; i++){
+        for(uint256 i=0; i< activequeue.length; i++){
             if((available[activequeue[i]] == true) && (Game(activequeue[i]).wages() == _wage)){
-                availableList[currentIndex] = activequeue[i];
-                currentIndex++;
+                return activequeue[i];
             }
         }
-        uint num = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender, randNonce))) % availableList.length;
-        return availableList[num];
+        return address(0);
     } 
 
-    function joinGame(uint8[3] memory _choices, uint16 _wage) external activeUser{
+    function joinGame(uint8[3] memory _choices, uint16 _wage) external activeUser returns(address){
         require(IERC20(tokenAddress).balanceOf(msg.sender) >= _wage,"NEB"); //Not enough balance
         address _gameAdd = findGame(_wage);
+        require(_gameAdd != address(0),"A0");
         require(available[_gameAdd] == true,"NA");
-        randNonce++;
+        
         address winner = Game(_gameAdd).addPlayer2(msg.sender, _choices);
         address player1 =  Game(_gameAdd).player1();
         uint16 wage = Game(_gameAdd).wages();
@@ -56,14 +52,16 @@ contract RockPaperScissors is Users{
                 IERC20(tokenAddress).transferFrom(msg.sender, player1, wage);
             }
         }
+        return winner;
     }
 
-    function createCustomGame(address _player2, uint16 _wages, uint8[3] memory _p1Choices) external  userExists {
+    function createCustomGame(address _player2, uint16 _wages, uint8[3] memory _p1Choices) external  userExists returns (address) {
         require(IERC20(tokenAddress).balanceOf(msg.sender) >= _wages);
         Game newGame = new Game(msg.sender, _wages, _p1Choices);
         privatequeue.push(address(newGame));        
         player2PerCustom[address(newGame)] = _player2;
         available[address(newGame)] = true;
+        return (address(newGame));
     }
 
     function joinCustomGame(address _gameAdd, uint8[3] memory _p2Choices) external  userExists {

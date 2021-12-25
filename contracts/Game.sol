@@ -5,7 +5,7 @@ contract Game {
     address public immutable player1;
     address player2 = address(0);
     uint16 immutable public wages;
-    uint8[6] choices;
+    uint8[6] public choices;
     address public winner;
 
     //Best Of Three
@@ -22,8 +22,7 @@ contract Game {
             choices[i+3] = _choices[i];
         }
         player2 = _player2;
-        winner = startGame();
-        return winner;
+        return startGame();
     }
 
     function startGame() internal view returns (address) {
@@ -40,9 +39,9 @@ contract Game {
             }
         }
 
-        if((p1Rounds == 2) || ((p1Rounds == 1) && p2Rounds < 1)){
+        if((p1Rounds >= 2) || ((p1Rounds == 1) && p2Rounds < 1) ){
             return player1;
-        }else if(p2Rounds == 2 || ((p2Rounds == 1) && p1Rounds < 1)){
+        }else if(p2Rounds>= 2 || ((p2Rounds == 1) && p1Rounds < 1)){
             return  player2;
         }else {
             return address(0);
